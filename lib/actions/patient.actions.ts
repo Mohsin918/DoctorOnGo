@@ -1,9 +1,14 @@
 "use server";
 import Patient from "@/models/Patient";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs"; // Import bcrypt for password hashing and comparison
+import jwt from "jsonwebtoken";
+
 import { connectDB } from "@/db";
+
 mongoose.connect("mongodb://127.0.0.1:27017/doctor_on_go");
-const bcrypt = require("bcryptjs");
+
+const JWT_SECRET = "jsonwebtoken_secret_key";
 
 // export const isPatientRegistered = async (email: string) => {
 //   const patient = await Patient.findOne({ email });
@@ -23,68 +28,6 @@ const bcrypt = require("bcryptjs");
 //   };
 // };
 
-export const updatePatientPassword = async (
-  patientId: string,
-  newPassword: string
-) => {
-  await connectDB(); // Ensure the database connection is established
-
-  try {
-    // Find the patient by their ID
-    const patient = await Patient.findById(patientId);
-
-    if (!patient) {
-      throw new Error("Patient not found");
-    }
-
-    // Hash the new password before saving
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update the patient's password field
-    patient.password = hashedPassword;
-
-    // Save the updated patient record
-    await patient.save();
-
-    return { success: true, message: "Password updated successfully" };
-  } catch (error) {
-    console.error("Error updating patient password:", error);
-    throw new Error("Failed to update patient password");
-  }
-};
-
-export const verifyPatientPassword = async (
-  patientId: string,
-  enteredPassword: string
-): Promise<boolean> => {
-  await connectDB(); // Ensure database connection
-
-  try {
-    // Find the patient by their ID
-    const patient = await Patient.findById(patientId);
-
-    if (!patient) {
-      throw new Error("Patient not found");
-    }
-
-    // Check if the patient has a password set
-    if (!patient.password) {
-      throw new Error("No password set for this patient");
-    }
-
-    // Compare the entered password with the stored hashed password
-    const isPasswordValid = await bcrypt.compare(
-      enteredPassword,
-      patient.password
-    );
-
-    return isPasswordValid; // Return true if password matches, false otherwise
-  } catch (error) {
-    console.error("Error verifying patient password:", error);
-    throw new Error("Failed to verify password");
-  }
-};
-
 export const isPatientRegistered = async (email: string) => {
   try {
     // Find the patient in the database by email
@@ -100,6 +43,7 @@ export const isPatientRegistered = async (email: string) => {
 
     // Check if the patient is partially registered (e.g., missing required fields)
     const isPartiallyRegistered =
+      !patient.registeredDetails ||
       !patient.registeredDetails.birthDate ||
       !patient.registeredDetails.address ||
       !patient.registeredDetails.occupation;
@@ -118,27 +62,41 @@ export const isPatientRegistered = async (email: string) => {
   }
 };
 
+// Generate JWT Token
+const generateJWTToken = (patientId: string) => {
+  return jwt.sign({ id: patientId }, JWT_SECRET, { expiresIn: "1h" }); // Token valid for 1 hour
+};
+
+// Create a new patient and hash the password
 export const createPatient = async (data: {
   name: string;
   email: string;
   phone: string;
+  password: string;
 }): Promise<{ _id: string }> => {
   await connectDB();
   try {
-    // Log the data received from the frontend
-    console.log("Received data:", data); // For debugging
-
-    // Ensure that the data has `name`, `email`, and `phone` fields
-    if (!data.name || !data.email || !data.phone) {
-      throw new Error("Missing required fields: name, email, or phone");
+    // Ensure that the data has name, email, phone, and password fields
+    if (!data.name || !data.email || !data.phone || !data.password) {
+      throw new Error(
+        "Missing required fields: name, email, phone, or password"
+      );
     }
 
-    // Create and save a new patient in the database
-    const newPatient = new Patient(data);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const newPatient = new Patient({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      password: hashedPassword,
+    });
     await newPatient.save();
 
+    const token = generateJWTToken(newPatient._id);
+
     // Return the newly created patient's _id
-    return { _id: newPatient._id.toString() }; // Convert ObjectId to string
+    return { _id: newPatient._id.toString(), token }; // Convert ObjectId to string
   } catch (error) {
     console.error("Error creating patient:", error);
     throw new Error("Error creating patient");
@@ -186,5 +144,28 @@ export const registerPatient = async (
   } catch (error) {
     console.error("Error registering patient:", error);
     throw new Error("Error registering patient");
+  }
+};
+
+export const verifyPassword = async (
+  email: string,
+  enteredPassword: string
+) => {
+  await connectDB();
+  try {
+    const patient = await Patient.findOne({ email });
+    if (!patient || !patient.password) {
+      throw new Error("Patient not found or password not set");
+    }
+
+    const isMatch = await bcrypt.compare(enteredPassword, patient.password);
+    if (isMatch) {
+      const token = generateJWTToken(patient._id); // Generate JWT token upon password verification
+      return { isMatch: true, token }; // Return token with the match result
+    }
+    return { isMatch: false };
+  } catch (error) {
+    console.error("Error verifying password:", error);
+    throw new Error("Failed to verify password");
   }
 };

@@ -13,8 +13,8 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css"
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { Textarea } from "./ui/textarea";
 export enum FormFieldType {
   INPUT = "input",
@@ -24,6 +24,7 @@ export enum FormFieldType {
   DATE_PICKER = "datePicker",
   SELECT = "select",
   SKELETON = "skeleton",
+  PASSWORD = "PASSWORD",
 }
 
 interface CustomProps {
@@ -45,7 +46,6 @@ interface CustomProps {
 }
 
 const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
-  
   switch (props.fieldType) {
     case FormFieldType.INPUT:
       return (
@@ -69,17 +69,17 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           </FormControl>
         </div>
       );
-      case FormFieldType.TEXTAREA:
-        return (
-          <FormControl>
-            <Textarea
-              placeholder={props.placeholder}
-              {...field}
-              className="shad-textArea"
-              disabled={props.disabled}
-            />
-          </FormControl>
-        );
+    case FormFieldType.TEXTAREA:
+      return (
+        <FormControl>
+          <Textarea
+            placeholder={props.placeholder}
+            {...field}
+            className="shad-textArea"
+            disabled={props.disabled}
+          />
+        </FormControl>
+      );
     case FormFieldType.PHONE_INPUT:
       return (
         <FormControl>
@@ -95,39 +95,39 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           />
         </FormControl>
       );
-   case FormFieldType.DATE_PICKER:
-    const today = new Date();
-    // Dynamically set minDate or maxDate based on the field name
-    const minDate = props.name === "schedule" ? today : undefined; // For appointments
-    const maxDate = props.name === "birthDate" ? today : undefined; // For date of birth
-    return (
-      <div className="flex rounded-md border border
-      border-dark-500 bg-dark-400">
-        <Image
-        src="/assets/icons/calendar.svg"
-        height={24}
-        width={24}
-        alt="calander"
-        className="ml-2"
-        />
-        <FormControl>
-          <DatePicker
-          selected={field.value}
-          onChange={(date)=> field.onChange
-            (date)} 
-            dateFormat= {props.dateFormat ?? 'MM/dd/yyyy'}
-            showTimeSelect={props.showTimeSelect ?? false}
-            timeInputLabel="Time:"
-            minDate={minDate}
-            maxDate={maxDate}
-            wrapperClassName="date-picker"
+    case FormFieldType.DATE_PICKER:
+      const today = new Date();
+      // Dynamically set minDate or maxDate based on the field name
+      const minDate = props.name === "schedule" ? today : undefined; // For appointments
+      const maxDate = props.name === "birthDate" ? today : undefined; // For date of birth
+      return (
+        <div
+          className="flex rounded-md border border
+      border-dark-500 bg-dark-400"
+        >
+          <Image
+            src="/assets/icons/calendar.svg"
+            height={24}
+            width={24}
+            alt="calander"
+            className="ml-2"
+          />
+          <FormControl>
+            <DatePicker
+              selected={field.value}
+              onChange={(date) => field.onChange(date)}
+              dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
+              showTimeSelect={props.showTimeSelect ?? false}
+              timeInputLabel="Time:"
+              minDate={minDate}
+              maxDate={maxDate}
+              wrapperClassName="date-picker"
             />
-
-
-        </FormControl>
-      </div> )
+          </FormControl>
+        </div>
+      );
     case FormFieldType.SKELETON:
-      return props.renderSkeleton ? props.renderSkeleton(field) : null
+      return props.renderSkeleton ? props.renderSkeleton(field) : null;
     case FormFieldType.SELECT:
       return (
         <FormControl>
@@ -143,24 +143,24 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           </Select>
         </FormControl>
       );
-      case FormFieldType.CHECKBOX:
-        return (
-          <FormControl>
-            <div className="flex items-center gap-4">
-              <Checkbox
-                id={props.name}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <label htmlFor={props.name} className="checkbox-label">
-                {props.label}
-              </label>
-            </div>
-          </FormControl>
-        );
-  
-   default:
-    return null
+    case FormFieldType.CHECKBOX:
+      return (
+        <FormControl>
+          <div className="flex items-center gap-4">
+            <Checkbox
+              id={props.name}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+            <label htmlFor={props.name} className="checkbox-label">
+              {props.label}
+            </label>
+          </div>
+        </FormControl>
+      );
+
+    default:
+      return null;
   }
 };
 
@@ -186,4 +186,3 @@ const CustomFormField = (props: CustomProps) => {
 };
 
 export default CustomFormField;
-

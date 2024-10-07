@@ -1,28 +1,36 @@
-import React from 'react';
-import Image from 'next/image';
-import RegisterForm from '@/components/forms/RegisterForm';
-import { getPatientById } from '@/lib/actions/patient.actions'; // Import the function to fetch patient details
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import { redirect } from "next/navigation";
+import RegisterForm from "@/components/forms/RegisterForm";
+import Image from "next/image";
+import { getPatientById } from "@/lib/actions/patient.actions";
 
-import * as Sentry from '@sentry/nextjs';
+const JWT_SECRET = "jsonwebtoken_secret_key";
 
-interface SearchParamProps {
-  params: {
-    userId: string; // User ID will be passed as a route parameter
-  };
-}
+export default async function Register({ params: { userId } }) {
+  const cookieStore = cookies();
+  const token = cookieStore.get("jwt_token")?.value;
 
-const Register = async ({ params: { userId } }: SearchParamProps) => {
+  if (!token) {
+    redirect("/"); // Redirect to home if no token
+  }
+
   try {
-    // Fetch the patient details using the userId
+    const decodedToken = jwt.verify(token, JWT_SECRET); // Decode and verify token
+    const userIdFromToken = decodedToken.id;
+
+    if (userIdFromToken !== userId) {
+      redirect("/"); // Unauthorized, redirect to home
+    }
+
+    // Fetch the patient data
     const user = await getPatientById(userId);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
-    // Track with Sentry (optional)
-    // Sentry.metrics.set('user_view_register', user.name);
-
+    // Render the register page
     return (
       <div className="flex h-screen max-h-screen">
         <section className="remove-scrollbar container">
@@ -33,7 +41,6 @@ const Register = async ({ params: { userId } }: SearchParamProps) => {
               width={100}
               alt="patient"
             />
-            {/* Pass the fetched user details to the RegisterForm */}
             <RegisterForm user={user} />
             <p className="copyright py-12">© 2024 Doctor on Go</p>
           </div>
@@ -48,14 +55,6 @@ const Register = async ({ params: { userId } }: SearchParamProps) => {
       </div>
     );
   } catch (error) {
-    console.error('Error fetching user details:', error);
-    return (
-      <div className="flex h-screen max-h-screen">
-        <p className="error-message">Failed to load user data.</p>
-      </div>
-    );
+    redirect("/"); // Redirect if token is invalid or user is not found
   }
-};
-
-export default Register;
-
+}

@@ -1,8 +1,8 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types } from "mongoose";
 
 // Enums for Gender and Status
-export type Gender = 'male' | 'female' | 'other';
-export type Status = 'pending' | 'scheduled' | 'completed';
+export type Gender = "male" | "female" | "other";
+export type Status = "pending" | "scheduled" | "completed";
 
 // Patient Interface
 export interface Patient extends Document {
@@ -11,6 +11,7 @@ export interface Patient extends Document {
   name: string;
   email: string;
   phone: string;
+  password: string;
   birthDate: Date;
   gender: Gender;
   address: string;
