@@ -1,10 +1,23 @@
 import { useState } from "react";
 import Modal from "react-modal";
 
-const PasswordModal = ({ isOpen, onClose, onSubmit, isNewPatient }) => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+// Define the type for the props
+interface PasswordModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (password: string) => void;
+  isNewPatient: boolean;
+}
+
+const PasswordModal: React.FC<PasswordModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  isNewPatient,
+}) => {
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleSubmit = () => {
     if (isNewPatient && password !== confirmPassword) {
@@ -39,7 +52,7 @@ const PasswordModal = ({ isOpen, onClose, onSubmit, isNewPatient }) => {
           boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
           textAlign: "center",
           animation: "slide-down 0.3s ease-out",
-          inset: "auto", // This ensures modal is centered
+          inset: "auto", // Ensure modal is centered
         },
       }}
     >
