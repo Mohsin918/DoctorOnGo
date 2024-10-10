@@ -8,7 +8,10 @@ import { getDoctors } from "@/lib/actions/doctor.actions"; // Import the functio
 import { z } from "zod";
 import { SelectItem } from "@/components/ui/select";
 // import { createAppointment, updateAppointment } from "@/lib/actions/appointment.actions";
-import { createAppointment, updateAppointment} from "@/lib/actions/test.actions";
+import {
+  createAppointment,
+  updateAppointment,
+} from "@/lib/actions/test.actions";
 import { getAppointmentSchema } from "@/lib/validation";
 import { Appointment } from "@/types/mongoDB.types";
 import "react-datepicker/dist/react-datepicker.css";
@@ -55,14 +58,18 @@ const AppointmentForm = ({
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
       doctor: appointment ? appointment?.doctor : "",
-      schedule: appointment ? new Date(appointment?.schedule!) : new Date(Date.now()),
+      schedule: appointment
+        ? new Date(appointment?.schedule!)
+        : new Date(Date.now()),
       reason: appointment ? appointment.reason : "",
       note: appointment?.note || "",
       cancellationReason: appointment?.cancellationReason || "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof AppointmentFormValidation>) => {
+  const onSubmit = async (
+    values: z.infer<typeof AppointmentFormValidation>
+  ) => {
     setIsLoading(true);
 
     let status;
@@ -89,17 +96,15 @@ const AppointmentForm = ({
           note: values.note,
         };
 
-    
         const newAppointment = await createAppointment(appointment);
 
-        console.log("New-Appointment",newAppointment)
-    
-
-
+        console.log("New-Appointment", newAppointment);
 
         if (newAppointment) {
           form.reset();
-          router.push(`/patients/${userId}/new-appointment/success?appointmentId=${newAppointment._id}`);
+          router.push(
+            `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment._id}`
+          );
         }
       } else {
         const appointmentToUpdate = {
@@ -121,56 +126,54 @@ const AppointmentForm = ({
           router.refresh();
         }
       }
-    } 
+    } catch (error) {
+      // try {
+      //   if (type === "create" && userId) {
+      //     // Handle creation of a new appointment
+      //     const appointment = {
+      //       patient: userId, // Assuming userId is the patient ID
+      //       userId,
+      //       doctor: values.doctor,
+      //       schedule: new Date(values.schedule),
+      //       reason: values.reason!,
+      //       status: status as Status,
+      //       note: values.note,
+      //     };
 
-    // try {
-    //   if (type === "create" && userId) {
-    //     // Handle creation of a new appointment
-    //     const appointment = {
-    //       patient: userId, // Assuming userId is the patient ID
-    //       userId,
-    //       doctor: values.doctor,
-    //       schedule: new Date(values.schedule),
-    //       reason: values.reason!,
-    //       status: status as Status,
-    //       note: values.note,
-    //     };
-    
-    //     // Create a new appointment
-    //     const newAppointment = await createAppointment(appointment);
-    
-    //     if (newAppointment) {
-    //       // Reset form and navigate to success page after appointment creation
-    //       form.reset();
-    //       router.push(`/patients/${userId}/new-appointment/success?appointmentId=${newAppointment._id}`);
-    //     }
-    //   } else if (appointment?._id && (type === "schedule" || type === "cancel")) {
-    //     // Handle updating an existing appointment (schedule or cancel)
-    //     const appointmentToUpdate = {
-    //       userId,
-    //       appointmentId: appointment._id.toString(), // Ensure the appointmentId is a string
-    //       appointment: {
-    //         doctor: values.doctor,
-    //         schedule: new Date(values.schedule),
-    //         status: status as Status,
-    //         cancellationReason: values.cancellationReason,
-    //       },
-    //       type, // Only "schedule" or "cancel" types are passed here
-    //     };
-    
-    //     // Update the appointment
-    //     const updatedAppointment = await updateAppointment(appointmentToUpdate);
-    
-    //     if (updatedAppointment) {
-    //       // Close the modal, reset the form, and redirect after successful update
-    //       setOpen && setOpen(false);
-    //       form.reset();
-    //       router.push('/');
-    //     }
-    //   }
-    // }
-    catch (error) {
-      console.error("Error creating appointment",error);
+      //     // Create a new appointment
+      //     const newAppointment = await createAppointment(appointment);
+
+      //     if (newAppointment) {
+      //       // Reset form and navigate to success page after appointment creation
+      //       form.reset();
+      //       router.push(`/patients/${userId}/new-appointment/success?appointmentId=${newAppointment._id}`);
+      //     }
+      //   } else if (appointment?._id && (type === "schedule" || type === "cancel")) {
+      //     // Handle updating an existing appointment (schedule or cancel)
+      //     const appointmentToUpdate = {
+      //       userId,
+      //       appointmentId: appointment._id.toString(), // Ensure the appointmentId is a string
+      //       appointment: {
+      //         doctor: values.doctor,
+      //         schedule: new Date(values.schedule),
+      //         status: status as Status,
+      //         cancellationReason: values.cancellationReason,
+      //       },
+      //       type, // Only "schedule" or "cancel" types are passed here
+      //     };
+
+      //     // Update the appointment
+      //     const updatedAppointment = await updateAppointment(appointmentToUpdate);
+
+      //     if (updatedAppointment) {
+      //       // Close the modal, reset the form, and redirect after successful update
+      //       setOpen && setOpen(false);
+      //       form.reset();
+      //       router.push('/');
+      //     }
+      //   }
+      // }
+      console.error("Error creating appointment", error);
     }
     setIsLoading(false);
   };
@@ -193,7 +196,9 @@ const AppointmentForm = ({
         {type === "create" && (
           <section className="mb-12 space-y-4">
             <h1 className="header">New Appointment</h1>
-            <p className="text-dark-700">Request a new appointment in 10 seconds.</p>
+            <p className="text-dark-700">
+              Request a new appointment in 10 seconds.
+            </p>
           </section>
         )}
 
@@ -210,7 +215,11 @@ const AppointmentForm = ({
                 <SelectItem key={doctor.name + i} value={doctor.name}>
                   <div className="flex cursor-pointer items-center gap-2">
                     <Image
-                      src={`/assets/images/dr-${(doctor.name.split(' ')[1]).toLowerCase()}.png`} // Fallback image if doctor image is missing
+                      src={`/assets/images/dr-${
+                        doctor.name.split(" ")[1]
+                          ? doctor.name.split(" ")[1].toLowerCase()
+                          : doctor.name.toLowerCase()
+                      }.png`} // Fallback to full name if second word is missing
                       width={32}
                       height={32}
                       alt="doctor"
@@ -231,7 +240,11 @@ const AppointmentForm = ({
               dateFormat="MM/dd/yyyy  -  h:mm aa"
             />
 
-            <div className={`flex flex-col gap-6  ${type === "create" && "xl:flex-row"}`}>
+            <div
+              className={`flex flex-col gap-6  ${
+                type === "create" && "xl:flex-row"
+              }`}
+            >
               <CustomFormField
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
@@ -265,7 +278,9 @@ const AppointmentForm = ({
 
         <SubmitButton
           isLoading={isLoading}
-          className={`${type === "cancel" ? "shad-danger-btn" : "shad-primary-btn"} w-full`}
+          className={`${
+            type === "cancel" ? "shad-danger-btn" : "shad-primary-btn"
+          } w-full`}
         >
           {buttonLabel}
         </SubmitButton>
@@ -275,4 +290,3 @@ const AppointmentForm = ({
 };
 
 export default AppointmentForm;
-

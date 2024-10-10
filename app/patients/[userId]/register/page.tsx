@@ -7,6 +7,7 @@ import { getPatientById } from "@/lib/actions/patient.actions";
 
 const JWT_SECRET = "jsonwebtoken_secret_key";
 
+// eslint-disable-next-line @next/next/no-async-client-component
 export default async function Register({ params: { userId } }) {
   const cookieStore = cookies();
   const token = cookieStore.get("jwt_token")?.value;

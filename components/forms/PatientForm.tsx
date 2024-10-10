@@ -97,7 +97,7 @@ export const PatientForm = () => {
           password: password,
         });
 
-        setCookie(null, "jwt_token", token, { maxAge: 3600, path: "/" }); // Store JWT token in cookie
+        setCookie(null, "jwt_token", token, { maxAge: 3600, path: "/" });
 
         router.push(`/patients/${_id}/register`);
       }

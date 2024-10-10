@@ -3,9 +3,7 @@
 // import "./globals.css";
 // import { ThemeProvider } from "@/components/theme-provider"
 
-
 // import { cn } from '@/lib/utils'
-
 
 // const fontSans = Plus_Jakarta_Sans({
 //   subsets: ["latin"],
@@ -30,7 +28,7 @@
 //         attribute="class"
 //         defaultTheme="dark"
 //         >
-//        {children}    
+//        {children}
 //       </ThemeProvider>
 //         </body>
 //     </html>
@@ -93,6 +91,20 @@ export default function RootLayout({
                   </Link>
                 </li>
                 <li>
+                  <Link href="/loginDoctor" className="hover:text-gray-400">
+                    Login Doctor
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/track-application"
+                    className="hover:text-gray-400"
+                  >
+                    Track Application
+                  </Link>
+                </li>
+
+                <li>
                   <Link href="/about" className="hover:text-gray-400">
                     About Us
                   </Link>
@@ -113,4 +125,3 @@ export default function RootLayout({
     </html>
   );
 }
-

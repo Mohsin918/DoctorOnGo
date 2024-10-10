@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 
-// Use environment variables to store the secret
 const JWT_SECRET = "jsonwebtoken_secret_key";
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("jwt_token"); // Get the JWT token from cookies
+  const token = req.cookies.get("jwt_token");
   const { pathname } = req.nextUrl;
 
   // Define the routes that need protection
